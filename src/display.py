@@ -6,6 +6,7 @@ from matplotlib.widgets import Slider
 import skimage.io as io
 import medpy.io
 from math import ceil
+import random
 
 
 def loadImage(filename=None):
@@ -34,6 +35,66 @@ def loadImage(filename=None):
 	print("File information:")
 	print("Shape: {}".format(image_data.shape))
 	return image_data
+
+
+def display2D(image_filename=None, seg_filename=None, image_color_map='bone', seg_color_map='jet', seg_alpha=0.5):
+    """
+    Displays random cut random layer for a given 1 sequence voxel
+    """
+
+    image_data = loadImage(image_filename)
+    if len(image_data) < 0:
+        # Return value of loadign image < 0 -> error occurred
+        return -1
+
+    if seg_filename:
+        seg_data = loadImage(seg_filename)
+        if image_data.shape != seg_data.shape:
+            print("Image data and Segmentation data do not have the same shape {}!={}".format(image_data.shape, seg_data.shape))
+            return -1
+        if len(seg_data) < 0:
+            return -1
+        
+        fig, ax = plt.subplots(1, 2)
+        
+    
+    cut = random.randint(0, 2)
+
+    if cut == 0:
+        index = random.randint(0, image_data.shape[cut])
+        if seg_filename:
+            ax[0].set_title("YZ cut | layer: {}".format(index))
+            ax[1].set_title("Segmentation/Mask")
+            ax[0].imshow(image_data[index, :, :], cmap=image_color_map)
+            ax[1].imshow(seg_data[index, :, :], cmap=seg_color_map)
+        else:
+            plt.title("YZ cut | layer: {}".format(index))
+            plt.imshow(image_data[index, :, :], cmap=image_color_map)
+
+    elif cut == 1:
+        index = random.randint(0, image_data.shape[cut])
+        if seg_filename:
+            ax[0].set_title("XZ cut | layer: {}".format(index))
+            ax[1].set_title("Segmentation/Mask")
+            ax[0].imshow(image_data[:, index, :], cmap=image_color_map)
+            ax[1].imshow(seg_data[:, index, :], cmap=seg_color_map)
+        else:
+            plt.title("XZ cut | layer: {}".format(index))
+            plt.imshow(image_data[:, index, :], cmap=image_color_map)
+
+    elif cut == 2:
+        index = random.randint(0, image_data.shape[cut])
+        if seg_filename:
+            ax[0].set_title("XY cut | layer: {}".format(index))
+            ax[1].set_title("Segmentation/Mask")
+            ax[0].imshow(image_data[:, :, index], cmap=image_color_map)
+            ax[1].imshow(seg_data[:, :, index], cmap=seg_color_map)
+        else:
+            plt.title("XY cut | layer: {}".format(index))
+            plt.imshow(image_data[:, :, index], cmap=image_color_map)
+    else:
+        print("Something went wrong")
+    
 	
 
 def display3DCuts(image_filename=None, seg_filename=None, image_color_map='bone', seg_color_map='jet', seg_alpha=0.5):

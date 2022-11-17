@@ -9,7 +9,6 @@ from sklearn.preprocessing import MinMaxScaler
 scaler = MinMaxScaler()
 
 
-# os.path.join(TRAINING_DIR, "BraTS20_Training_{}/BraTS20_Training_{}_flair.nii".format(PATIENT, PATIENT))
 
 def process_images(patient_dir_path, processed_path=""):
 	"""
@@ -46,72 +45,114 @@ def process_images(patient_dir_path, processed_path=""):
 
 
 def process_mask(patient_dir_path, processed_path=""):
-    """ 
-    Mask relabeling 4 -> 3 (label 3 is empty)
-    Then croping it to 128x128x128 images, taking out all the blanc usless information (less computing time + less bias for the Neural Network)
-    Ratio thing usless for now then Saving it as a numpy array .npy
-    """
+	""" 
+	Mask relabeling 4 -> 3 (label 3 is empty)
+	Then croping it to 128x128x128 images, taking out all the blanc usless information (less computing time + less bias for the Neural Network)
+	Ratio thing usless for now then Saving it as a numpy array .npy
+	"""
 
-    patient = patient_dir_path.split('/')[-1]
+	patient = patient_dir_path.split('/')[-1]
 
-    mask = nib.load(os.path.join(patient_dir_path, "{}_seg.nii".format(patient))).get_fdata()
-    mask = mask.astype(np.uint8)
-    
-    # Change the label 4 to 3
-    mask[mask==4] = 3 
-    mask = mask[56:184, 56:184, 13:141] # Shape 128x128x128
-    
-    mask = to_categorical(mask, num_classes=4)
-    np.save(os.path.join(processed_path, "mask", patient+".npy"), mask)
+	mask = nib.load(os.path.join(patient_dir_path, "{}_seg.nii".format(patient))).get_fdata()
+	mask = mask.astype(np.uint8)
+
+	# Change the label 4 to 3
+	mask[mask==4] = 3 
+	mask = mask[56:184, 56:184, 13:141] # Shape 128x128x128
+
+	mask = to_categorical(mask, num_classes=4)
+	np.save(os.path.join(processed_path, "mask", patient+".npy"), mask)
 
 
 def process_patient(patient_dir_path, processed_path="", val=False):
-    """
-    Processes the images and the mask of a single patient by calling above functions
-    """
-    if val:
-        process_mask(patient_dir_path, processed_path)
-        process_images(patient_dir_path, processed_path)
-        return True
-    else:
-        if random.randint(0,10) <= 8: # Get a ~80% chance of getting picked for training
-            process_mask(patient_dir_path, processed_path)
-            process_images(patient_dir_path, processed_path)
-            return True
-        return False
+	"""
+	Processes the images and the mask of a single patient by calling above functions
+	"""
+	if val:
+		process_mask(patient_dir_path, processed_path)
+		process_images(patient_dir_path, processed_path)
+		return True
+	else:
+		if random.randint(0,10) <= 8: # Get a ~80% chance of getting picked for training
+			process_mask(patient_dir_path, processed_path)
+			process_images(patient_dir_path, processed_path)
+			return True
+		return False
 
 
 def process_dataset(dataset_path=None, processed_path="", val=False):
-    """
-    Process an entire dataset with a specific schema
-    """
-    
-    if dataset_path is None:
-        print("Please enter a dataset path")
-        return -1
+	"""
+	Process an entire dataset with a specific schema
+	"""
 
-    # Create the folders in which fill the processed images following schema:
-    """ training_processed/
-    ├─ images/
-    │  ├─ BraTS20_Training_001.npy
-    │  ├─ BraTS20_Training_002.npy
-    │  ├─ BraTS20_Training_XXX.npy
-    │  ├─ BraTS20_Training_YYY.npy
-    ├─ mask/
-    │  ├─ BraTS20_Training_001.npy
-    │  ├─ BraTS20_Training_002.npy
-    │  ├─ BraTS20_Training_XXX.npy
-    │  ├─ BraTS20_Training_YYY.npy
-    """
-    os.mkdir(processed_path)
-    os.mkdir(processed_path+"/images")
-    os.mkdir(processed_path+"/mask")
+	if dataset_path is None:
+		print("Please enter a dataset path")
+		return -1
 
-    # Processes each patient in the original dataset
-    for dirname, patients, filenames in os.walk(dataset_path):
-        for patient in patients: 
-            if process_patient(os.path.join(dirname, patient), processed_path, val):
-                shutil.rmtree(os.path.join(dirname, patient))
+	# Create the folders in which fill the processed images following schema:
+	""" training_processed/
+	├─ images/
+	│  ├─ BraTS20_Training_001.npy
+	│  ├─ BraTS20_Training_002.npy
+	│  ├─ BraTS20_Training_XXX.npy
+	│  ├─ BraTS20_Training_YYY.npy
+	├─ mask/
+	│  ├─ BraTS20_Training_001.npy
+	│  ├─ BraTS20_Training_002.npy
+	│  ├─ BraTS20_Training_XXX.npy
+	│  ├─ BraTS20_Training_YYY.npy
+	"""
+	os.mkdir(processed_path)
+	os.mkdir(processed_path+"/images")
+	os.mkdir(processed_path+"/mask")
+
+	# Processes each patient in the original dataset
+	for dirname, patients, filenames in os.walk(dataset_path):
+		for patient in patients: 
+			if process_patient(os.path.join(dirname, patient), processed_path, val):
+				shutil.rmtree(os.path.join(dirname, patient))
 
 
+
+def loadImageBis(image_dir, image_list):
+	"""
+	Load images in a given directory for a given list
+	"""
+
+	images = []
+
+	for i, image_name in enumerate(image_list):
+		if (image_name.split(".")[-1] == 'npy'):
+			image = np.load(image_dir + image_name)
+			images.append(image)
+
+	images = np.array(images)
+
+	return images
+
+
+
+def imageLoader(image_dir, image_list, mask_dir, mask_list, batch_size):
+	"""
+	image loader to give batches of images with a size of batch_size
+	"""
+
+	L = len(image_list) 
+
+	while True:
+
+		batch_start = 0
+		batch_end = batch_size
+
+		while batch_start < L:
+			limit = min(batch_end, L)
+
+
+			X = loadImageBis(image_dir, image_list[batch_start:limit])
+			Y = loadImageBis(mask_dir, mask_list[batch_start:limit])
+
+			yield(X, Y)
+
+			batch_start += batch_size
+			batch_end += batch_size
 

@@ -17,34 +17,38 @@ def loadImage(filename=None):
 	if filename == None:
 		print("Make sure to enter an image filename")
 		return -1
-
+	
+	file_ext = filename.split('.')[-1]
+	name = filename.split('.')[-2].split('/')[-1]
+	
 	# Load inputs data
-	if filename.split('.')[-1] == 'mha':
-		print("Input file: mha")
+	if file_ext == 'mha':
+		print("Input file: {} mha".format(name))
 		image_data, image_header = medpy.io.load(filename)
-	elif filename.split('.')[-1] == 'nii' or 'nii' + filename.split('.')[-1] == 'niigz':
-		print("Input file: nii")
+	elif file_ext == 'nii' or 'nii' + file_ext == 'niigz':
+		print("Input file: {} nii".format(name))
 		image_data = nib.load(filename).get_fdata()
-	elif filename.split('.')[-1] == 'npy':
-		print("Input file: numpy array")
+	elif file_ext == 'npy':
+		print("Input file: {} numpy array".format(name))
 		image_data = np.load("filename")
 	else:
 		print("Make sure to enter a supported file extension (.mha / .nii / .nii.gz)")
 		return -1
 
 	print("File information:")
-	print("Shape: {}".format(image_data.shape))
+	print("\t Shape: {}".format(image_data.shape))
 	return image_data
 
 
 def display2D(image_filename=None, seg_filename=None, image_color_map='bone', seg_color_map='jet', seg_alpha=0.5):
     """
     Displays random cut random layer for a given 1 sequence voxel
+	Option to give segmention (it displays the same cut same layer)
     """
 
     image_data = loadImage(image_filename)
     if len(image_data) < 0:
-        # Return value of loadign image < 0 -> error occurred
+        # length of loaded image < 0 -> error occurred
         return -1
 
     if seg_filename:
@@ -53,6 +57,7 @@ def display2D(image_filename=None, seg_filename=None, image_color_map='bone', se
             print("Image data and Segmentation data do not have the same shape {}!={}".format(image_data.shape, seg_data.shape))
             return -1
         if len(seg_data) < 0:
+			# length of loaded seg image < 0 -> error occurred
             return -1
         
         fig, ax = plt.subplots(1, 2)

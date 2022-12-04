@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 import skimage.io as io
-import medpy.io
 from math import ceil
 import random
 
@@ -83,12 +82,15 @@ def display3DCuts(brain_data, seg_data=None, brain_color_map='bone', seg_color_m
 
 	if len(brain_data) < 0:
 		# Return value of loadign image < -1 -> error occurred
+		print("Brain data is empty")
 		return -1
 	if brain_data.ndim != 3:
 		print("You should provide a 3 dimension array as brain data")
+		return -1
 
 	if seg_data is not None:
 		if len(seg_data) < 0:
+			print("Segmentation data is empty")
 			return -1
 		if seg_data.ndim != 3:
 			print("You should provide a 3 dimension array as seg data")

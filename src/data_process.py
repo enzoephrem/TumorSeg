@@ -10,39 +10,39 @@ import display
 
 
 """
-All datasets should ahve the following form for each patient before process
+All datasets should have the following form for each patient before process
 	dataset/
 	├─ BraTS20_001/
-	│  ├─ BraTS20_001_flair.nii
-	│  ├─ BraTS20_002_seg.nii
-	│  ├─ BraTS20_002_t1.nii
-	│  ├─ BraTS20_002_t1ce.nii
-	│  ├─ BraTS20_002_t2.nii
+	│  ├─ BraTS20_001_flair.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_002_seg.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_002_t1.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_002_t1ce.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_002_t2.(mha, nii, nii.gz, npy)
 	├─ BraTS20_002/
-	│  ├─ BraTS20_002_flair.nii
-	│  ├─ BraTS20_002_seg.nii
-	│  ├─ BraTS20_002_t1.nii
-	│  ├─ BraTS20_002_t1ce.nii
-	│  ├─ BraTS20_002_t2.nii
+	│  ├─ BraTS20_002_flair.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_002_seg.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_002_t1.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_002_t1ce.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_002_t2.(mha, nii, nii.gz, npy)
 	├─ BraTS20_XXX/
-	│  ├─ BraTS20_XXX_flair.nii
-	│  ├─ BraTS20_XXX_seg.nii
-	│  ├─ BraTS20_XXX_t1.nii
-	│  ├─ BraTS20_XXX_t1ce.nii
-	│  ├─ BraTS20_XXX_t2.nii
+	│  ├─ BraTS20_XXX_flair.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_XXX_seg.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_XXX_t1.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_XXX_t1ce.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_XXX_t2.(mha, nii, nii.gz, npy)
 	├─ BraTS20_YYY/
-	│  ├─ BraTS20_YYY_flair.nii
-	│  ├─ BraTS20_YYY_seg.nii
-	│  ├─ BraTS20_YYY_t1.nii
-	│  ├─ BraTS20_YYY_t1ce.nii
-	│  ├─ BraTS20_YYY_t2.nii
+	│  ├─ BraTS20_YYY_flair.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_YYY_seg.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_YYY_t1.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_YYY_t1ce.(mha, nii, nii.gz, npy)
+	│  ├─ BraTS20_YYY_t2.(mha, nii, nii.gz, npy)
 
 This data processing is made for a U-Net with an input shape of 128x128x128
 """
 
 def load(filepath):
 	"""
-	Load a brain IRM or npy array 
+	Load a brain IRM with either of those extensions (.mha, .nii, .nii.gz, .npy)
 	"""
 	
 	file_ext = filepath.split('.')[-1]
@@ -94,7 +94,7 @@ def process_images(patient_dir_path, processed_dir_path="", file_ext='nii'):
 	image_t2 = load(os.path.join(patient_dir_path, "{}_t2.{}".format(patient, file_ext))).get_fdata()
 	image_t2 = scaler.fit_transform(image_t2.reshape(-1, image_t2.shape[-1])).reshape(image_t2.shape)
 
-	if image_flair.shape == image_t1ce.shape == image_t2.shape:
+	if image_flair.shape == image_t1ce.shape == image_t2.shape and image_flair.ndim == image_t1ce.ndim == image_t2.ndim == 3 :
 		# Stack 3 most important channel into 1 numpy array to feed the U-Net
 		resulting_image = np.stack([image_flair,
 									image_t1ce,
@@ -104,8 +104,9 @@ def process_images(patient_dir_path, processed_dir_path="", file_ext='nii'):
 		resulting_image = resulting_image[56:184, 56:184, 13:141] # Shape 128x128x128x3 (x4 if t1 included)
 
 		np.save(os.path.join(processed_dir_path, "images", patient+".npy"), resulting_image)
+		
 	else:
-		print("Channels don't have the same shape")
+		print("Channels don't have the same shape and/or are not conform to the standard IRM dim (X, X, X) for each channel")
 		return -1
 
 
@@ -141,15 +142,10 @@ def process_patient(patient_dir_path, processed_dir_path="", val_or_test=False, 
 
 	# If True don't process the mask (no ground truth for validation and testing data)
 	if val_or_test:
-		process_mask(patient_dir_path, processed_dir_path, file_ext)
 		process_images(patient_dir_path, processed_dir_path, file_ext)
-		return True
 	else:
-		if random.randint(0,10) <= 8: # Get a ~80% chance of getting picked for training
-			process_mask(patient_dir_path, processed_dir_path, file_ext)
-			process_images(patient_dir_path, processed_dir_path, file_ext)
-			return True
-		return False
+		process_images(patient_dir_path, processed_dir_path, file_ext)
+		process_mask(patient_dir_path, processed_dir_path, file_ext)
 
 
 def processd_dataset(dataset_folder_path, processed_dir_path="processed", val_or_test=False, file_ext='nii'):
@@ -179,10 +175,9 @@ def processd_dataset(dataset_folder_path, processed_dir_path="processed", val_or
 	# Processes each patient in the original dataset
 	for dirname, patients, filenames in os.walk(dataset_folder_path):
 		for patient in patients: 
-			if process_patient(os.path.join(dirname, patient), processed_dir_path, val_or_test, file_ext):
-				# uncomment the line below if you want to delete the raw data (convinient for online limitied storage)
-				#shutil.rmtree(os.path.join(dirname, patient))
-				pass
+			process_patient(os.path.join(dirname, patient), processed_dir_path, val_or_test, file_ext)
+			# uncomment the line below if you want to delete the raw data after processing it (convinient for online limitied storage)
+			#shutil.rmtree(os.path.join(dirname, patient))
 
 
 
@@ -245,7 +240,7 @@ def process_brats_file_submission(filepath, patient, ref):
 	# Open the saved prediction
 	img = load(filepath).get_fdata()
 	img = img.astype(np.float64)
-	# Get a nii image with the same affine and header as the ref
+	# Get a nii image with the same affine and header as the ref (ref -> a provided verified image from the challange)
 	img = nib.Nifti1Image(img, ref.affine, ref.header)
 	# Save the nii.gz at the same location
 	img.to_filename(filepath)  # Save as NiBabel file

@@ -1,18 +1,9 @@
-# Brain Tumor Segmentation
+# Segmentation
 
-## Abstract
-
-The semantic segmentation of a brain tumor is of paramount importance for its treatment and prevention. Recently with the help of various neural network-based architectures, researches have managed to reach incredible performance in segmentation of brain tumor sub-regions.
-
-
-## Dataset
-
-Brats challange ...
-
-## Netwrok Architecture
-
-U-net ...
+In this repo you will find any code that was necessary to achieve the segmentation of a brain tumor.
+From displaying any type of brain MRI data, to processing it.
+Furthermore you will find the code of the model used.
+A small notebook will be included to walk through the code and show an exemple of how it could be used.
 
 
-## Results
-
+# References

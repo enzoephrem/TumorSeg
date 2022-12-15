@@ -12,6 +12,11 @@ def display2D(brain_data, seg_data=None, brain_color_map='bone', seg_color_map='
 	"""
 	Displays random cut random layer for a given 1 sequence voxel
 	Option to give segmention (it displays the same cut same layer)
+	:param array brain_data: 3D array of brain
+	:param array seg_data: 3D array of mask
+	:param string brain_color_map: brain color map
+	:param string seg_color_map: segmentation color map
+	:return int: -1 for error
 	"""
 
 	if len(brain_data) < 0:
@@ -19,18 +24,21 @@ def display2D(brain_data, seg_data=None, brain_color_map='bone', seg_color_map='
 		return -1
 	if brain_data.ndim != 3:
 		print("You should provide a 3 dimension array as brain data")
+		return -1
+
+	print("Type of brain data {}".format(type(brain_data)))
 
 	if seg_data is not None:
 		if len(seg_data) < 0:
 			return -1
 		if seg_data.ndim != 3:
 			print("You should provide a 3 dimension array as seg data")
+			return -1
 		if brain_data.shape != seg_data.shape:
 			print("Image data and Segmentation data do not have the same shape {}!={}".format(brain_data.shape, seg_data.shape))
 			return -1
 
-	print("Type of brain data {}".format(brain_data.type))
-	print("Type of seg data {}".format(seg_data.type))
+	print("Type of seg data {}".format(type(seg_data.type)))
 	print("Brain and Segmentation data have shape {}".format(brain_data.shape))
         
 	fig, ax = plt.subplots(1, 2)
@@ -75,18 +83,24 @@ def display2D(brain_data, seg_data=None, brain_color_map='bone', seg_color_map='
 
 def display3DCuts(brain_data, seg_data=None, brain_color_map='bone', seg_color_map='jet', seg_alpha=0.5):
 	"""
-	Display a brain voxel seen from 3 different angles Coronal, Sagittal and Horizontal
-	with sliders to go through the layers
+	Display a brain seen from 3 different angles Coronal, Sagittal and Horizontal angles
+	with sliders to go through the layers (in 3D)
+	:param array brain_data: 3D array of brain 
+	:param array seg_data: 3D array of mask
+	:param string brain_color_map: brain color map
+	:param string seg_color_map: segmentation color map
+	:param string seg_alpha: segmentation alpha (defines how much segmentation will be transparent: 1 being oppac)
+	:return int: -1 for error
 	"""
 
-
 	if len(brain_data) < 0:
-		# Return value of loadign image < -1 -> error occurred
 		print("Brain data is empty")
 		return -1
 	if brain_data.ndim != 3:
 		print("You should provide a 3 dimension array as brain data")
 		return -1
+
+	print("Type of brain data {}".format(type(brain_data)))
 
 	if seg_data is not None:
 		if len(seg_data) < 0:
@@ -98,8 +112,7 @@ def display3DCuts(brain_data, seg_data=None, brain_color_map='bone', seg_color_m
 			print("Image data and Segmentation data do not have the same shape {}!={}".format(brain_data.shape, seg_data.shape))
 			return -1
 
-	print("Type of brain data {}".format(brain_data.type))
-	print("Type of seg data {}".format(seg_data.type))
+	print("Type of seg data {}".format(type(seg_data)))
 	print("Brain and Segmentation data have shape {}".format(brain_data.shape))
 
 	# Plot with 3 Columns
@@ -128,10 +141,13 @@ def display3DCuts(brain_data, seg_data=None, brain_color_map='bone', seg_color_m
 
 	# Update function for each respective slider and it's plot
 	def update_X(val):
+		# Get the slider value
 		layer = slider_X.val
+		# Show the layer with the value on the slider 
 		ax[0].imshow(brain_data[layer,:,:], cmap=brain_color_map)
 		if seg_data is not None:
 			ax[0].imshow(seg_data[layer,:,:], cmap=seg_color_map, alpha=seg_alpha*(seg_data[layer,:,:]>0))
+			# Change the title to the current layer
 		ax[0].set_title("{}/{}".format(layer, brain_data.shape[0] - 1))
 		fig.canvas.draw_idle()
 
@@ -152,7 +168,7 @@ def display3DCuts(brain_data, seg_data=None, brain_color_map='bone', seg_color_m
 		fig.canvas.draw_idle()
 
 
-	# Update plot when detected interaction with slider
+	# Update plot when interaction detected on slider
 	slider_X.on_changed(update_X)
 	slider_Y.on_changed(update_Y)
 	slider_Z.on_changed(update_Z)

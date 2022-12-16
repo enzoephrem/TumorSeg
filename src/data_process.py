@@ -124,7 +124,6 @@ def process_mask(patient_dir_path, processed_dir_path="", file_ext='nii'):
 	mask = load(os.path.join(patient_dir_path, "{}_seg.{}".format(patient, file_ext))).get_fdata()
 	mask = mask.astype(np.uint8)
 
-	# Change the label 4 to 3 (the model was train with this logic)
 	mask[mask==4] = 3 
 	mask = mask[56:184, 56:184, 13:141] # Shape 128x128x128
 

@@ -19,9 +19,6 @@ And then the last window will display the prediction of the brain tumor segmenta
 """
 
 
-
-
-
 from sklearn.preprocessing import MinMaxScaler
 scaler = MinMaxScaler()
 
@@ -42,8 +39,7 @@ not_processed_path = "../_patients/BraTS2021_{}/BraTS2021_{}_".format(patient, p
 display.display3DCuts(dp.load(not_processed_path+"t1ce.nii.gz"))
 
 
-# Pre-Processing
-
+# Pre-Processing (Fitting + Scaling)
 image_flair = nib.load(not_processed_path+"flair.nii.gz").get_fdata()
 image_flair = scaler.fit_transform(image_flair.reshape(-1, image_flair.shape[-1])).reshape(image_flair.shape)
 
@@ -71,13 +67,12 @@ model = load_model('../saved_models/brats_3d_simple_unet_50.h5',
                                       'iou_score':sm.metrics.IOUScore(threshold=0.5),
                                       'f1-score':sm.metrics.FScore()})
 
-# Match the input shape of the model (None, 128, 128, 128)
+# Match the input shape of the model (None, 128, 128, 128, 3)
 input_image = np.expand_dims(processed_image, axis=0)
 
 prediction = model.predict(input_image)
 
 # Prediction process
-
 # Get the highest predicted label
 prediciton = np.argmax(prediction, axis=4)[0,:,:,:]
 # Replace the segmentation in a 240x240x155 array to match the original image shape 240x240x155

@@ -3,28 +3,21 @@
 In this repo you will find any code that was necessary to achieve the segmentation of a brain tumor.
 From displaying any type of brain MRI data, to processing it.
 Furthermore you will find the code of the model used.
-A small notebook will be included to walk through the code and show an exemple of how it could be used using the kaggle BraTS 2020 (validation + training) dataset.
+A small notebook will be included to walk through the code and show an exemple of how it could be used using the **[BraTS2020 Dataset (Training + Validation)](https://www.kaggle.com/datasets/awsaf49/brats20-dataset-training-validation)** dataset.
 
 
-## Note
+## Exemple
 
-Note that any demo should be launched within the demo folder 
+In the [notebook](main.ipynb) you will find an exemple of how to train a neural network to perform segmentation.
+Before going into it, make sure to have your [Kaggle API]((https://www.kaggle.com/docs/api)) key at hand.
 
-### 00_demo
-
-Shows the process of a patient MRI till segmentation
-### 01_demo
-
-Shows the compareson of the mask and the predicted mask
-
-### display_demo
-
-Exemples of how the display functions are used
+## [Demo](demo)
+Couple of demo file that treats different cases.
 ## Logs
 
-Logs of the trained model can be found in the logs folder
+[Logs](logs) we're stored using a tensorboard callback during the training.
 
-``` tensorboard --logdir='log' ```
+use ``` tensorboard --logdir='log' ```
 
 It will launch the tensorboard instance
 

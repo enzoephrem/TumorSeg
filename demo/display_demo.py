@@ -1,6 +1,10 @@
 import sys
-sys.path.append('../src/')
-import display
+sys.path.append('src/')
+try :
+    import display
+except ModuleNotFoundError:
+    sys.path.append('../src/')
+    import display
 import data_process as dp
 
 

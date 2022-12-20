@@ -9,9 +9,15 @@ Displays the raw brain data in 3D using the display functions, then the processe
 
 
 
-MRI|Processed|Result
-:-------------------------:|:-------------------------:|:-------------------------:
-![](../ressources/001_demo.png)|![](../ressources/002_demo.png)|![](../ressources/003_demo.png)
+
+
+<table>
+  <tr>
+    <td><img src="../ressources/001_demo.png" width=585 height=351></td>
+    <td><img src="../ressources/002_demo.png" width=585 height=351></td>
+    <td><img src="../ressources/003_demo.png" width=585 height=351></td>
+  </tr>
+ </table>
 
 ### [01_demo](01_demo.py)
 After processsing and getting a prediction by the model.

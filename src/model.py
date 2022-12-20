@@ -7,7 +7,11 @@ kernel_initializer =  'he_uniform' # the way we initialize our weights
 
 
 def simple_unet_model(IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH, IMG_CHANNELS, num_classes):
-    
+    """
+    Model archetecture
+    """
+
+
     inputs = Input((IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH, IMG_CHANNELS))
     
     s = inputs

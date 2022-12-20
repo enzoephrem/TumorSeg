@@ -1,15 +1,18 @@
 import sys
-sys.path.append('src/')
+sys.path.append('../src/')
 import display
+import data_process as dp
 import numpy as np
 import nibabel as nib
 from keras.models import load_model
 
 
 
-patient = "00263"
+"""
+In this demo, the given patient should have a ground truth mask to work with.
+The demo will show an example of comparing, in 3D displaying how the model prediction compared to the true mask.
+"""
 
-not_processed_path = "RSNA_ASNR_MICCAI_BraTS2021_TrainingData/BraTS2021_{}/BraTS2021_{}_".format(patient, patient)
 
 from sklearn.preprocessing import MinMaxScaler
 scaler = MinMaxScaler()
@@ -23,16 +26,15 @@ total_loss = dice_loss + (1 * focal_loss)
 
 
 
+patient = "0000"
+
+not_processed_path = "../_patients/BraTS2021_{}/BraTS2021_{}_".format(patient, patient)
+
+
 # Pre-Processing
 
 image_flair = nib.load(not_processed_path+"flair.nii.gz").get_fdata()
 image_flair = scaler.fit_transform(image_flair.reshape(-1, image_flair.shape[-1])).reshape(image_flair.shape)
-
-"""
-# Not useful
-image_t1 = nib.load(filename+"t1.nii.gz").get_fdata()
-image_t1 = scaler.fit_transform(test_image_t1.reshape(-1, test_image_t1.shape[-1])).reshape(test_image_t1.shape)
-"""
 
 image_t1ce = nib.load(not_processed_path+"t1ce.nii.gz").get_fdata()
 image_t1ce = scaler.fit_transform(image_flair.reshape(-1, image_flair.shape[-1])).reshape(image_flair.shape)
@@ -49,9 +51,10 @@ resulting_image = np.stack([image_flair,
 resulting_image = resulting_image[56:184, 56:184, 13:141] # Shape 128x128x128x3
 
 
-model = load_model('saved_models/brats_3d_simple_unet_30.h5', 
-                      custom_objects={'dice_loss_plus_1focal_loss': total_loss,
-                                      'iou_score':sm.metrics.IOUScore(threshold=0.5)})
+model = load_model('../saved_models/brats_3d_simple_unet_50.h5', 
+                        custom_objects={'dice_loss_plus_1focal_loss': total_loss,
+                                      'iou_score':sm.metrics.IOUScore(threshold=0.5),
+                                      'f1-score':sm.metrics.FScore()})
 
 input_image = np.expand_dims(resulting_image, axis=0)
 
@@ -67,8 +70,8 @@ result[56:184, 56:184, 13:141] = prediciton
 result[result==3] = 4
 
 
-brain = display.loadImage(not_processed_path+"t1ce.nii.gz")
-truth = display.loadImage(not_processed_path+"seg.nii.gz")
+brain = dp.load(not_processed_path+"t1ce.nii.gz")
+truth = dp.load(not_processed_path+"seg.nii.gz")
 
 
 display.displayPred3DCuts2(brain, truth, result)

@@ -81,19 +81,19 @@ def process_images(patient_dir_path, processed_dir_path="", file_ext='nii'):
 
 	patient = patient_dir_path.split('/')[-1]
 
-	image_flair = load(os.path.join(patient_dir_path, "{}_flair.{}".format(patient, file_ext))).get_fdata()
+	image_flair = load(os.path.join(patient_dir_path, "{}_flair.{}".format(patient, file_ext)))
 	image_flair = scaler.fit_transform(image_flair.reshape(-1, image_flair.shape[-1])).reshape(image_flair.shape)
 
 	"""
 	# Not useful
-	test_image_t1 = load(os.path.join(patient_dir_path, "{}_t1.{}".format(patient, file_ext))).get_fdata()
+	test_image_t1 = load(os.path.join(patient_dir_path, "{}_t1.{}".format(patient, file_ext)))
 	test_image_t1 = scaler.fit_transform(test_image_t1.reshape(-1, test_image_t1.shape[-1])).reshape(test_image_t1.shape)
 	"""
 
-	image_t1ce = load(os.path.join(patient_dir_path, "{}_t1ce.{}".format(patient, file_ext))).get_fdata()
+	image_t1ce = load(os.path.join(patient_dir_path, "{}_t1ce.{}".format(patient, file_ext)))
 	image_t1ce = scaler.fit_transform(image_t1ce.reshape(-1, image_t1ce.shape[-1])).reshape(image_t1ce.shape)
 
-	image_t2 = load(os.path.join(patient_dir_path, "{}_t2.{}".format(patient, file_ext))).get_fdata()
+	image_t2 = load(os.path.join(patient_dir_path, "{}_t2.{}".format(patient, file_ext)))
 	image_t2 = scaler.fit_transform(image_t2.reshape(-1, image_t2.shape[-1])).reshape(image_t2.shape)
 
 	if image_flair.shape == image_t1ce.shape == image_t2.shape and image_flair.ndim == image_t1ce.ndim == image_t2.ndim == 3 :
@@ -121,7 +121,7 @@ def process_mask(patient_dir_path, processed_dir_path="", file_ext='nii'):
 
 	patient = patient_dir_path.split('/')[-1]
 
-	mask = load(os.path.join(patient_dir_path, "{}_seg.{}".format(patient, file_ext))).get_fdata()
+	mask = load(os.path.join(patient_dir_path, "{}_seg.{}".format(patient, file_ext)))
 	mask = mask.astype(np.uint8)
 
 	mask[mask==4] = 3 
@@ -136,20 +136,20 @@ def process_mask(patient_dir_path, processed_dir_path="", file_ext='nii'):
 	np.save(os.path.join(processed_dir_path, "mask", patient+".npy"), mask)
 
 
-def process_patient(patient_dir_path, processed_dir_path="", val_or_test=False, file_ext='nii'):
+def process_patient(patient_dir_path, processed_dir_path="", test=False, file_ext='nii'):
 	"""
 	Processes the images and the mask of a single patient by calling above functions
 	"""
 
 	# If True don't process the mask (no ground truth for validation and testing data)
-	if val_or_test:
+	if test:
 		process_images(patient_dir_path, processed_dir_path, file_ext)
 	else:
 		process_images(patient_dir_path, processed_dir_path, file_ext)
 		process_mask(patient_dir_path, processed_dir_path, file_ext)
 
 
-def processd_dataset(dataset_folder_path, processed_dir_path="processed", val_or_test=False, file_ext='nii'):
+def processd_dataset(dataset_folder_path, processed_dir_path="processed", test=False, file_ext='nii'):
 	"""
 	Process an entire dataset
 	:param string `dataset_folder_path`: path of the dataset
@@ -181,8 +181,8 @@ def processd_dataset(dataset_folder_path, processed_dir_path="processed", val_or
 
 	# Processes each patient in the original dataset
 	for dirname, patients, filenames in os.walk(dataset_folder_path):
-		for patient in patients: 
-			process_patient(os.path.join(dirname, patient), processed_dir_path, val_or_test, file_ext)
+		for patient in patients:
+			process_patient(os.path.join(dirname, patient), processed_dir_path, test, file_ext)
 			# uncomment the line below if you want to delete the raw data after processing it (convinient for online limitied storage)
 			#shutil.rmtree(os.path.join(dirname, patient))
 
@@ -190,9 +190,9 @@ def processd_dataset(dataset_folder_path, processed_dir_path="processed", val_or
 
 def loadImage(image_dir, image_list):
 	"""
-	Load images in a given directory for a given list
+	Load images in a given directory for a given image_path list
 	:param string image_dir: dir location of the images
-	:param list image_list: dir location of the images
+	:param list image_list: list of images paths
 	"""
 
 	images = []

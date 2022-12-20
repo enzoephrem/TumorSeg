@@ -1,9 +1,21 @@
 import sys
-sys.path.append('src/')
+sys.path.append('../src/')
 import display
+import data_process as dp
 import numpy as np
 import nibabel as nib
 from keras.models import load_model
+
+
+
+"""
+This file will display 3 plt interfaces one after the other. Showing first of all the brain MRI of the given patient (in folder _patients).
+Then the second window will display the same brain but after being processed.
+And then the last window will display the prediction of the brain tumor segmentation.
+"""
+
+
+
 
 
 from sklearn.preprocessing import MinMaxScaler
@@ -16,29 +28,20 @@ dice_loss = sm.losses.DiceLoss(class_weights=np.array([wt0, wt1, wt2, wt3]))
 focal_loss = sm.losses.CategoricalFocalLoss()
 total_loss = dice_loss + (1 * focal_loss)
 
-# Patient with a big tumor
-patient = "00153"
-# Patient with a small tumor
-#patient = "01754"
 
-not_processed_path = "RSNA_ASNR_MICCAI_BraTS2021_ValidationData/BraTS2021_{}/BraTS2021_{}_".format(patient, patient)
+patient = "0000"
 
+not_processed_path = "../_patients/BraTS2021_{}/BraTS2021_{}_".format(patient, patient)
 
 
 # Display data
-display.display3DCuts(display.loadImage(not_processed_path+"t1ce.nii.gz"))
+display.display3DCuts(dp.load(not_processed_path+"t1ce.nii.gz"))
 
 
 # Pre-Processing
 
 image_flair = nib.load(not_processed_path+"flair.nii.gz").get_fdata()
 image_flair = scaler.fit_transform(image_flair.reshape(-1, image_flair.shape[-1])).reshape(image_flair.shape)
-
-"""
-# Not useful
-image_t1 = nib.load(filename+"t1.nii.gz").get_fdata()
-image_t1 = scaler.fit_transform(test_image_t1.reshape(-1, test_image_t1.shape[-1])).reshape(test_image_t1.shape)
-"""
 
 image_t1ce = nib.load(not_processed_path+"t1ce.nii.gz").get_fdata()
 image_t1ce = scaler.fit_transform(image_flair.reshape(-1, image_flair.shape[-1])).reshape(image_flair.shape)
@@ -55,15 +58,16 @@ processed_image = np.stack([image_flair,
 processed_image = processed_image[56:184, 56:184, 13:141] # Shape 128x128x128x3
 
 
-
+# Display processed brain image
 display.display3DCuts(processed_image[:, :, :, 1])
 
+# Load model
+model = load_model('../saved_models/brats_3d_simple_unet_50.h5', 
+                        custom_objects={'dice_loss_plus_1focal_loss': total_loss,
+                                      'iou_score':sm.metrics.IOUScore(threshold=0.5),
+                                      'f1-score':sm.metrics.FScore()})
 
-model = load_model('saved_models/brats_3d_simple_unet_30.h5', 
-                      custom_objects={'dice_loss_plus_1focal_loss': total_loss,
-                                      'iou_score':sm.metrics.IOUScore(threshold=0.5)})
-
-
+# Match the input shape of the model (None, 128, 128, 128)
 input_image = np.expand_dims(processed_image, axis=0)
 
 prediction = model.predict(input_image)
@@ -78,4 +82,6 @@ result[56:184, 56:184, 13:141] = prediciton
 # Revert the label 3 to the original 4
 result[result==3] = 4
 
-display.display3DCuts(display.loadImage(not_processed_path+"flair.nii.gz"), result)
+
+# Display prediction
+display.display3DCuts(dp.load(not_processed_path+"flair.nii.gz"), result)

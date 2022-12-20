@@ -12,15 +12,12 @@ In the [notebook](main.ipynb) you will find an exemple of how to train a neural 
 Before going into it, make sure to have your [Kaggle API]((https://www.kaggle.com/docs/api)) key at hand.
 
 ## [Demo](demo)
-Couple of demo file that treats different cases.
 ## Logs
 
 [Logs](logs) we're stored using a tensorboard callback during the training.
 
-use ``` tensorboard --logdir='log' ```
+To launch the tensorboard instance run
 
-It will launch the tensorboard instance
+``` tensorboard --logdir='log' ```
 
-## Ressources 
-
-Included in the ressources folder, 3 hist plots of the Dice scores from the brats challenge countinious challenge 2021
+It will give a view on the evolution of the loss, the F1Score also known as the Dice Coefficient and the IOUScore. For both the training and validation data.

@@ -14,7 +14,7 @@ Before going into it, make sure to have your [Kaggle API]((https://www.kaggle.co
 ## [Demo](demo)
 ## Logs
 
-[Logs](logs) we're stored using a tensorboard callback during the training.
+[Logs](logs) were stored using a tensorboard callback during the training.
 
 To launch the tensorboard instance run
 

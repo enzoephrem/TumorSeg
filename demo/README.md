@@ -17,11 +17,12 @@ Displays the raw brain data in 3D using the display functions, then the processe
     <td><img src="../ressources/002_demo.png" width=585 height=351></td>
     <td><img src="../ressources/003_demo.png" width=585 height=351></td>
   </tr>
- </table>
+</table>
 
 ### [01_demo](01_demo.py)
 After processsing and getting a prediction by the model.
 A display comparing the ground thruth to the prediction will give an idea of the model's accuracy.
+
 
 ### [display_demo](display_demo.py)
 Exemples of how the display functions are used

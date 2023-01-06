@@ -4,9 +4,9 @@
 
 ## Abstract
 
-In this <a href=https://github.com/enzoephrem/TumorSeg/raw/main/ressources/TumorSeg.pdf target="_blank" type="application/pdf">paper</a>, presented a brain tumor segmentation method using deep learning. A tumor can appear anywhere in the brain, it can take different shape, size and contrast. That is why the use of the different sequences in MRI techniques will be exploited to benefit the segmentation. By extracting the most important features from the MRIs inputs a corresponding segmentation will be generated. To do so, we can distinguish 2 path in the neural network the first one, called contracting path which will be dedicated to extract important and useful information. And the second one the expansive path that will, based on the information extracted, predict the segmentation of the tumor.
+In this paper (click <a href=https://github.com/enzoephrem/TumorSeg/raw/main/ressources/TumorSeg.pdf target="_blank" type="application/pdf">here</a> to download), presented a brain tumor segmentation method using deep learning. A tumor can appear anywhere in the brain, it can take different shape, size and contrast. That is why the use of the different sequences in MRI techniques will be exploited to benefit the segmentation. By extracting the most important features from the MRIs inputs a corresponding segmentation will be generated. To do so, we can distinguish 2 path in the neural network the first one, called contracting path which will be dedicated to extract important and useful information. And the second one the expansive path that will, based on the information extracted, predict the segmentation of the tumor.
 
-## Introduction
+## Intro
 
 In this repo you will find any code that was necessary to achieve the segmentation of a brain tumor.
 From displaying any type of brain MRI data, to processing it.
